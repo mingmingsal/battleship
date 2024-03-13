@@ -3,69 +3,77 @@ class Ship {
     //Length = how many tiles a ship takes
     //Hits = an array containing where the ship got hit
     //isSunk = if number of hits is equal to the length, it is sunk
-    constructor(length, hits) {
+    constructor(length) {
         this.length = length;
-        this.hits = hits
+        this.hits = 0;
         this.sunk = false;
     }
 
     hit() {
-        this.hits++;
+        if(!this.sunk){
+            this.hits++;
+            this.isSunk();
+        return this.hits;
+        }
+        
     }
     isSunk() {
         if (this.hits === this.length) {
-            sunk = true;
+            this.sunk = true;
         }
     }
+
 }
 
 class Gameboard {
     constructor(boardSize) {
         //Board stores where has been hit
-        this.board = () => {
-            let arr = [];
-            for (let x = 0; x < boardSize; x++) {
-                for (let y = 0; y < boardSize; y++) {
-                    arr[x].push(null);
-                }
-            }
-        }
+        this.boardSize = boardSize;
+        this.board = this.initBoard(boardSize);
+        
+    }
+    initBoard(boardSize){
+        return [...Array(boardSize)].map(() => Array(boardSize).fill(null));
 
     }
+
     receiveAttack(x, y) {
-        switch (this.board[x][y]) {
-            case null:
-                this.board[x][y] = "miss";
-                break;
-            case "miss":
-                return false;
-            case "ship":
-            //pseudo code ship hit
-            default:
-                return false;
+        if(this.board[x][y]===null){
+            this.board[x][y] = "miss";
         }
+        else if (this.board[x][y] === "miss"){
+            throw new Error('Space already hit')
+        }  
+        else if((typeof this.board[x][y])==="object"){
+            this.board[x][y].hit();
+            this.board[x][y]="hit";
     }
-    placeShip(x,y,length,direction){
+        else throw new Error('Invalid Space')
+        
+        return this.board;
+    }
+    placeShip(x,y,ship,direction){
         if(direction==="horizontal"){
-            for(let i = 0;i<length;i++){
-                if(this.board[x+i][y]=="ship"){
+            for(let i = 0;i<ship.length;i++){
+                if(this.board[x+i][y]!==null){
                     return false;
                 }
             }
-            for(let i = 0;i<length;i++){
-                this.board[x+i][y]=="ship"
+            for(let i = 0;i<ship.length;i++){
+                this.board[x+i][y]= ship;
             }
         }
         else if(direction==="vertical"){
-            for(let i = 0;i<length;i++){
-                if(this.board[x][y+i]=="ship"){
+            for(let i = 0;i<ship.length;i++){
+                if(this.board[x][y+i]!==null){
                     return false;
                 }
             }
-            for(let i = 0;i<length;i++){
-                this.board[x][y+i]=="ship"
+            for(let i = 0;i<ship.length;i++){
+                this.board[x][y+i]=ship
             }
         }
-        
+        return this.board;
     }
 }
+module.exports = {Gameboard,Ship};
